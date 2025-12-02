@@ -1,19 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'provider/country_provider.dart';
+import 'screen/home_screen.dart';
 
 void main() {
-  runApp(const MainApp());
+  runApp(const MyApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
+    // SM-02: Set up provider correctly in main file
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CountryProvider()),
+      ],
+      child: MaterialApp(
+        title: 'Country Explorer',
+        debugShowCheckedModeBanner: false,
+        // BON-03: Theme toggle preparation (basic setup)
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          useMaterial3: true,
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.blue,
+            foregroundColor: Colors.white,
+          ),
         ),
+        home: const HomeScreen(),
       ),
     );
   }
