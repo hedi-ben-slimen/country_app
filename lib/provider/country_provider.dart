@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import '../model/country_model.dart';
-import '../service/service.dart'; // Updated path to lowercase
+import '../service/service.dart';
 
 class CountryProvider with ChangeNotifier {
-  // FIX 1: Use constructor injection and remove internal instantiation
   final ApiService apiService;
 
   List<Country> _countries = [];
-  // Favorites stored as a list of Country objects. Uniqueness is determined by commonName.
   final List<Country> _favorites = [];
   bool _isLoading = false;
   String? _errorMessage;
 
-  // FIX 2: Define the constructor to accept the named parameter
   CountryProvider({required this.apiService});
 
   List<Country> get countries => _countries;
@@ -46,16 +43,14 @@ class CountryProvider with ChangeNotifier {
     }
   }
 
-  // FIX 3: Rename method from getAllCountries to fetchCountries
   Future<void> fetchCountries() async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      _countries = await apiService.fetchCountries(); // Use injected service
+      _countries = await apiService.fetchCountries();
     } catch (e) {
-      // Keep the error message clean for display
       _errorMessage = e.toString();
     } finally {
       _isLoading = false;

@@ -48,7 +48,6 @@ class _AppWrapperState extends State<AppWrapper> {
           ),
         ],
         currentIndex: _selectedIndex,
-        // Use white colors for icons/text when in dark mode so they remain visible
         selectedItemColor: widget.isDark
             ? Colors.white
             : Theme.of(context).primaryColor,

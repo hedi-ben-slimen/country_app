@@ -4,7 +4,6 @@ import '../model/country_model.dart';
 import '../provider/country_provider.dart';
 import '../service/service.dart';
 
-// NV-04: StatefulWidget for details
 class DetailScreen extends StatefulWidget {
   final Country country;
 
@@ -23,7 +22,6 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   void initState() {
     super.initState();
-    // Load weather if coordinates exist
     if (widget.country.latitude != null && widget.country.longitude != null) {
       _loadWeather(widget.country.latitude!, widget.country.longitude!);
     }
@@ -82,7 +80,6 @@ class _DetailScreenState extends State<DetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Large Flag
             Hero(
               tag: widget.country.commonName,
               child: Image.network(
@@ -107,7 +104,6 @@ class _DetailScreenState extends State<DetailScreen> {
                   _buildInfoRow('Region', widget.country.region),
                   _buildInfoRow('Population', '${widget.country.population}'),
                   const SizedBox(height: 8),
-                  // Currency information (from Country.currencies)
                   if (widget.country.currencies.isNotEmpty) ...[
                     const Text(
                       'Currencies:',
@@ -136,7 +132,6 @@ class _DetailScreenState extends State<DetailScreen> {
                   ],
 
                   const SizedBox(height: 8),
-                  // Weather info
                   const Text(
                     'Weather:',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),

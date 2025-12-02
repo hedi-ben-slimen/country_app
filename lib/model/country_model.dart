@@ -5,9 +5,7 @@ class Country {
   final String region;
   final int population;
   final String flagUrl;
-  // Map of currency code -> { name, symbol }
   final Map<String, dynamic> currencies;
-  // Optional coordinates (latitude, longitude) - usually from 'latlng' in REST API
   final double? latitude;
   final double? longitude;
 

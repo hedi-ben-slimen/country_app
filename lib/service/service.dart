@@ -21,8 +21,6 @@ class ApiService {
     }
   }
 
-  /// Fetch current weather using Open-Meteo (no API key). Returns the
-  /// 'current_weather' map if available, otherwise throws on network errors.
   Future<Map<String, dynamic>> fetchWeather(
     double latitude,
     double longitude,

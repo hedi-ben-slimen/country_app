@@ -5,11 +5,9 @@ import 'provider/country_provider.dart';
 import 'service/service.dart';
 
 void main() {
-  // SM-02: Set up provider correctly in main file
   runApp(
     MultiProvider(
       providers: [
-        // App state
         ChangeNotifierProvider(
           create: (_) => CountryProvider(apiService: ApiService()),
         ),
@@ -40,45 +38,129 @@ class _CountryExplorerAppState extends State<CountryExplorerApp> {
     return MaterialApp(
       title: 'Country Explorer',
       theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+        useMaterial3: true,
         brightness: Brightness.light,
-        primarySwatch: Colors.indigo,
-        appBarTheme: const AppBarTheme(
+        appBarTheme: AppBarTheme(
           elevation: 0,
-          titleTextStyle: TextStyle(
+          backgroundColor: ColorScheme.fromSeed(
+            seedColor: Colors.indigo,
+          ).primary,
+          titleTextStyle: const TextStyle(
             color: Colors.white,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
+          iconTheme: const IconThemeData(color: Colors.white),
         ),
         cardTheme: CardThemeData(
           elevation: 4,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
+          color: ColorScheme.fromSeed(seedColor: Colors.indigo).surface,
+          margin: const EdgeInsets.all(6),
         ),
-        useMaterial3: true,
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.indigo,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          ),
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: Colors.indigo,
+          foregroundColor: Colors.white,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.grey[100],
+          hintStyle: TextStyle(color: Colors.grey[600]),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: Colors.white,
+          selectedItemColor: Colors.indigo,
+          unselectedItemColor: Colors.grey[600],
+          showUnselectedLabels: true,
+        ),
+        textTheme: const TextTheme(
+          titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          bodyMedium: TextStyle(fontSize: 16),
+        ),
       ),
       darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.indigo,
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
         brightness: Brightness.dark,
-        primarySwatch: Colors.indigo,
-        appBarTheme: const AppBarTheme(
+        appBarTheme: AppBarTheme(
           elevation: 0,
-          titleTextStyle: TextStyle(
+          backgroundColor: ColorScheme.fromSeed(
+            seedColor: Colors.indigo,
+            brightness: Brightness.dark,
+          ).primary,
+          titleTextStyle: const TextStyle(
             color: Colors.white,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
+          iconTheme: const IconThemeData(color: Colors.white),
         ),
         cardTheme: CardThemeData(
           elevation: 4,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
+          color: ColorScheme.fromSeed(
+            seedColor: Colors.indigo,
+            brightness: Brightness.dark,
+          ).surface,
+          margin: const EdgeInsets.all(6),
         ),
-        useMaterial3: true,
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.indigo,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          ),
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: Colors.indigo,
+          foregroundColor: Colors.white,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.grey[850],
+          hintStyle: TextStyle(color: Colors.grey[400]),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: Colors.grey[900],
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Colors.grey[500],
+          showUnselectedLabels: true,
+        ),
+        textTheme: const TextTheme(
+          titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          bodyMedium: TextStyle(fontSize: 16),
+        ),
       ),
       themeMode: _mode,
-      // Home is set to AppWrapper which contains the BottomNavigationBar
       home: AppWrapper(
         onToggleTheme: _toggleTheme,
         isDark: _mode == ThemeMode.dark,
