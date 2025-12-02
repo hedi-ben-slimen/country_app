@@ -3,7 +3,7 @@ class Country {
   final String officialName;
   final String capital;
   final String region;
-  final String population;
+  final int population; 
   final String flagUrl;
 
   Country({
@@ -15,18 +15,54 @@ class Country {
     required this.flagUrl,
   });
 
-  // Factory constructor to create a Country from JSON
   factory Country.fromJson(Map<String, dynamic> json) {
-
+    String cName = 'Unknown';
+    String oName = 'Unknown';
     
+    if (json['name'] is String) {
+      cName = json['name'];
+      oName = json['name'];
+    } else if (json['name'] is Map) {
+      cName = json['name']['common'] ?? 'Unknown';
+      oName = json['name']['official'] ?? cName;
+    }
+
+    String cap = 'No Capital';
+    if (json['capital'] is String) {
+      cap = json['capital'];
+    } else if (json['capital'] is List && (json['capital'] as List).isNotEmpty) {
+      cap = (json['capital'] as List).first.toString();
+    }
+
+    String flag = '';
+    if (json['flags'] is String) {
+      flag = json['flags'];
+    } else if (json['flags'] is Map) {
+      flag = json['flags']['png'] ?? json['flags']['svg'] ?? '';
+    } else if (json['flag'] is String) {
+      flag = json['flag'];
+    }
+
+    int pop = 0;
+    final dynamic populationData = json['population'];
+
+    if (populationData != null) {
+      if (populationData is int) {
+        pop = populationData;
+      } else if (populationData is double) {
+        pop = populationData.toInt(); 
+      } else if (populationData is String) {
+        pop = int.tryParse(populationData) ?? 0;
+      }
+    }
+
     return Country(
-      commonName: json['name']?['common'] ?? 'Unknown',
-      officialName: json['name']?['official'] ?? 'Unknown',
-      // Capital is often a list in these APIs, we take the first one
-      capital: (json['capital'] as List<dynamic>?)?.first ?? 'No Capital',
+      commonName: cName,
+      officialName: oName,
+      capital: cap,
       region: json['region'] ?? 'Unknown',
-      population: json['population'] ?? 0,
-      flagUrl: json['flags']?['png'] ?? '',
+      population: pop, 
+      flagUrl: flag,
     );
   }
 }
