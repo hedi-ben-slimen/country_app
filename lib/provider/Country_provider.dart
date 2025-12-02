@@ -9,16 +9,14 @@ class CountryProvider with ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
-  // Getters to access private variables safely
   List<Country> get countries => _countries;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  // Method to fetch data
   Future<void> getAllCountries() async {
     _isLoading = true;
     _errorMessage = null;
-    notifyListeners(); // Tells UI: "Show the loading spinner!"
+    notifyListeners(); 
 
     try {
       _countries = await _apiService.fetchCountries();
@@ -26,7 +24,7 @@ class CountryProvider with ChangeNotifier {
       _errorMessage = e.toString();
     } finally {
       _isLoading = false;
-      notifyListeners(); // Tells UI: "Data is ready (or error happened), rebuild!"
+      notifyListeners(); 
     }
   }
 }

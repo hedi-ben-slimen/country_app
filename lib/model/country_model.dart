@@ -3,7 +3,7 @@ class Country {
   final String officialName;
   final String capital;
   final String region;
-  final int population;
+  final String population;
   final String flagUrl;
 
   Country({
@@ -17,9 +17,7 @@ class Country {
 
   // Factory constructor to create a Country from JSON
   factory Country.fromJson(Map<String, dynamic> json) {
-    // We use helper methods or safe access (?.) because APIs can sometimes return null
-    // Note: Adjust the keys ('name', 'common', etc.) based on the specific JSON response
-    // from https://www.apicountries.com/ if it differs from standard REST Countries structure.
+
     
     return Country(
       commonName: json['name']?['common'] ?? 'Unknown',
