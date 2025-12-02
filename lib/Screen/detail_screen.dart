@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../model/country_model.dart';
 import '../provider/country_provider.dart';
+import '../service/service.dart';
 
 // NV-04: StatefulWidget for details
 class DetailScreen extends StatefulWidget {
@@ -14,6 +15,41 @@ class DetailScreen extends StatefulWidget {
 }
 
 class _DetailScreenState extends State<DetailScreen> {
+  final ApiService _apiService = ApiService();
+  Map<String, dynamic>? _weather;
+  bool _loadingWeather = false;
+  String? _weatherError;
+
+  @override
+  void initState() {
+    super.initState();
+    // Load weather if coordinates exist
+    if (widget.country.latitude != null && widget.country.longitude != null) {
+      _loadWeather(widget.country.latitude!, widget.country.longitude!);
+    }
+  }
+
+  Future<void> _loadWeather(double lat, double lon) async {
+    setState(() {
+      _loadingWeather = true;
+      _weatherError = null;
+    });
+    try {
+      final data = await _apiService.fetchWeather(lat, lon);
+      setState(() {
+        _weather = data;
+      });
+    } catch (e) {
+      setState(() {
+        _weatherError = e.toString();
+      });
+    } finally {
+      setState(() {
+        _loadingWeather = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<CountryProvider>(context);
@@ -70,6 +106,83 @@ class _DetailScreenState extends State<DetailScreen> {
                   _buildInfoRow('Capital', widget.country.capital),
                   _buildInfoRow('Region', widget.country.region),
                   _buildInfoRow('Population', '${widget.country.population}'),
+                  const SizedBox(height: 8),
+                  // Currency information (from Country.currencies)
+                  if (widget.country.currencies.isNotEmpty) ...[
+                    const Text(
+                      'Currencies:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    ...widget.country.currencies.entries.map((e) {
+                      final code = e.key;
+                      final details = e.value is Map ? e.value : {};
+                      final name = details['name'] ?? '';
+                      final symbol = details['symbol'] ?? '';
+                      final display = name.isNotEmpty
+                          ? '$name ${symbol.isNotEmpty ? '($symbol)' : ''}'
+                          : code;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 6.0),
+                        child: Text(
+                          '$code: $display',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      );
+                    }),
+                  ],
+
+                  const SizedBox(height: 8),
+                  // Weather info
+                  const Text(
+                    'Weather:',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 6),
+                  if (_loadingWeather)
+                    const SizedBox(
+                      height: 24,
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else if (_weatherError != null)
+                    Row(
+                      children: [
+                        const Icon(Icons.error_outline, color: Colors.red),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(_weatherError!)),
+                      ],
+                    )
+                  else if (_weather != null && _weather!.isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Temperature: ${_weather!['temperature']} °C',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Wind speed: ${_weather!['windspeed']} km/h',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Time: ${_weather!['time']}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    Text(
+                      'No weather data available for ${widget.country.capital}',
+                      style: const TextStyle(fontSize: 16),
+                    ),
                 ],
               ),
             ),

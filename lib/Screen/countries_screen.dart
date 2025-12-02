@@ -7,6 +7,9 @@ import 'detail_screen.dart';
 
 enum SortOption { nameAsc, nameDesc, populationAsc, populationDesc }
 
+// Reuse a single NumberFormat instance for compact formatting across this file.
+final NumberFormat _compactFormatter = NumberFormat.compact();
+
 class CountriesScreen extends StatefulWidget {
   const CountriesScreen({super.key});
 
@@ -59,6 +62,12 @@ class _CountriesScreenState extends State<CountriesScreen> {
       // FIX: Calling the now correctly named fetchCountries
       Provider.of<CountryProvider>(context, listen: false).fetchCountries();
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -135,62 +144,12 @@ class _CountriesScreenState extends State<CountriesScreen> {
               Expanded(
                 child: RefreshIndicator(
                   // MS-05: Pull down to refresh
-                  onRefresh: () => provider
-                      .fetchCountries(), // FIX: Calling the now correctly named fetchCountries
-                  child: () {
-                    if (provider.isLoading) {
-                      // DH-04: Show loading spinners
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (provider.errorMessage != null) {
-                      // DH-03: Handle errors gracefully
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.error_outline,
-                              color: Colors.red,
-                              size: 60,
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              provider.errorMessage!,
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 10),
-                            ElevatedButton(
-                              onPressed: () => provider
-                                  .fetchCountries(), // FIX: Calling the now correctly named fetchCountries
-                              child: const Text('Retry'),
-                            ),
-                          ],
-                        ),
-                      );
-                    } else if (filteredCountries.isEmpty) {
-                      return const Center(
-                        child: Text('No countries found matching your search.'),
-                      );
-                    } else {
-                      // MS-02: Grid view showing all countries
-                      return GridView.builder(
-                        padding: const EdgeInsets.all(8.0),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              childAspectRatio:
-                                  0.7, // Adjust ratio for better card fitting
-                              crossAxisSpacing: 10,
-                              mainAxisSpacing: 10,
-                            ),
-                        itemCount: sortedCountries.length,
-                        itemBuilder: (context, index) {
-                          final country = sortedCountries[index];
-                          // The CountryCard assumes Country has properties like flagUrl, commonName, capital, population
-                          return CountryCard(country: country);
-                        },
-                      );
-                    }
-                  }(),
+                  onRefresh: () => provider.fetchCountries(),
+                  child: _buildBody(
+                    provider,
+                    filteredCountries,
+                    sortedCountries,
+                  ),
                 ),
               ),
             ],
@@ -198,6 +157,55 @@ class _CountriesScreenState extends State<CountriesScreen> {
         );
       },
     );
+  }
+
+  Widget _buildBody(
+    CountryProvider provider,
+    List<Country> filteredCountries,
+    List<Country> sortedCountries,
+  ) {
+    if (provider.isLoading) {
+      // DH-04: Show loading spinners
+      return const Center(child: CircularProgressIndicator());
+    } else if (provider.errorMessage != null) {
+      // DH-03: Handle errors gracefully
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, color: Colors.red, size: 60),
+            const SizedBox(height: 10),
+            Text(provider.errorMessage!, textAlign: TextAlign.center),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () => provider.fetchCountries(),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    } else if (filteredCountries.isEmpty) {
+      return const Center(
+        child: Text('No countries found matching your search.'),
+      );
+    } else {
+      // MS-02: Grid view showing all countries
+      return GridView.builder(
+        padding: const EdgeInsets.all(8.0),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 0.7, // Adjust ratio for better card fitting
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+        ),
+        itemCount: sortedCountries.length,
+        itemBuilder: (context, index) {
+          final country = sortedCountries[index];
+          // The CountryCard assumes Country has properties like flagUrl, commonName, capital, population
+          return CountryCard(country: country);
+        },
+      );
+    }
   }
 }
 
@@ -272,7 +280,7 @@ class CountryCard extends StatelessWidget {
                     // Population (formatted for readability)
                     Text(
                       // NumberFormat requires the 'intl' package dependency
-                      'Pop: ${NumberFormat.compact().format(country.population)}',
+                      'Pop: ${_compactFormatter.format(country.population)}',
                       style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     ),
                   ],
