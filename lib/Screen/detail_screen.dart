@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../model/country_model.dart';
+import '../provider/country_provider.dart';
 
 // NV-04: StatefulWidget for details
 class DetailScreen extends StatefulWidget {
@@ -12,33 +14,32 @@ class DetailScreen extends StatefulWidget {
 }
 
 class _DetailScreenState extends State<DetailScreen> {
-  // We can add local state here later (like "isFavorite") for Bonus features
-  bool isFavorite = false;
-
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<CountryProvider>(context);
+    final isFavorite = provider.isFavorite(widget.country);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.country.commonName),
         actions: [
-          // BON-02: Heart icon placeholder
           IconButton(
             icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
             color: Colors.red,
             onPressed: () {
-              setState(() {
-                isFavorite = !isFavorite;
-              });
+              final nowFavorite = provider.toggleFavorite(widget.country);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(isFavorite 
-                    ? '${widget.country.commonName} added to favorites!' 
-                    : '${widget.country.commonName} removed from favorites.'),
+                  content: Text(
+                    nowFavorite
+                        ? '${widget.country.commonName} added to favorites!'
+                        : '${widget.country.commonName} removed from favorites.',
+                  ),
                   duration: const Duration(seconds: 1),
                 ),
               );
             },
-          )
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -46,12 +47,18 @@ class _DetailScreenState extends State<DetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Large Flag
-            Hero( // Bonus: Simple animation tag
+            Hero(
               tag: widget.country.commonName,
               child: Image.network(
-                widget.country.flagUrl,
+                widget.country.flagUrl.isNotEmpty
+                    ? widget.country.flagUrl
+                    : 'https://placehold.co/800x400/000000/FFFFFF/png?text=No+Flag',
                 height: 250,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => const SizedBox(
+                  height: 250,
+                  child: Center(child: Icon(Icons.broken_image, size: 48)),
+                ),
               ),
             ),
             Padding(
@@ -63,8 +70,6 @@ class _DetailScreenState extends State<DetailScreen> {
                   _buildInfoRow('Capital', widget.country.capital),
                   _buildInfoRow('Region', widget.country.region),
                   _buildInfoRow('Population', '${widget.country.population}'),
-                  
-                  // Add more details here if your API supports them (Currency, etc.)
                 ],
               ),
             ),
@@ -84,18 +89,10 @@ class _DetailScreenState extends State<DetailScreen> {
             width: 120,
             child: Text(
               '$label:',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontSize: 16),
-            ),
-          ),
+          Expanded(child: Text(value, style: const TextStyle(fontSize: 16))),
         ],
       ),
     );

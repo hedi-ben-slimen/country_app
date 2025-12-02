@@ -7,6 +7,8 @@ class CountryProvider with ChangeNotifier {
   final ApiService apiService;
 
   List<Country> _countries = [];
+  // Favorites stored as a list of Country objects. Uniqueness is determined by commonName.
+  final List<Country> _favorites = [];
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -14,8 +16,35 @@ class CountryProvider with ChangeNotifier {
   CountryProvider({required this.apiService});
 
   List<Country> get countries => _countries;
+  List<Country> get favorites => List.unmodifiable(_favorites);
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+
+  bool isFavorite(Country country) {
+    return _favorites.any((c) => c.commonName == country.commonName);
+  }
+
+  void addFavorite(Country country) {
+    if (!isFavorite(country)) {
+      _favorites.add(country);
+      notifyListeners();
+    }
+  }
+
+  void removeFavorite(Country country) {
+    _favorites.removeWhere((c) => c.commonName == country.commonName);
+    notifyListeners();
+  }
+
+  bool toggleFavorite(Country country) {
+    if (isFavorite(country)) {
+      removeFavorite(country);
+      return false;
+    } else {
+      addFavorite(country);
+      return true;
+    }
+  }
 
   // FIX 3: Rename method from getAllCountries to fetchCountries
   Future<void> fetchCountries() async {

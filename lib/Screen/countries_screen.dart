@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart'; 
+import 'package:intl/intl.dart';
 import '../model/country_model.dart';
 import '../provider/country_provider.dart';
+import 'detail_screen.dart';
+
 class CountriesScreen extends StatefulWidget {
   const CountriesScreen({super.key});
 
@@ -21,9 +23,10 @@ class _CountriesScreenState extends State<CountriesScreen> {
     }
     return countries.where((country) {
       // Assuming Country model has commonName and capital properties
-      final nameLower = country.commonName.toLowerCase(); 
+      final nameLower = country.commonName.toLowerCase();
       final queryLower = _searchQuery.toLowerCase();
-      return nameLower.contains(queryLower) || country.capital.toLowerCase().contains(queryLower);
+      return nameLower.contains(queryLower) ||
+          country.capital.toLowerCase().contains(queryLower);
     }).toList();
   }
 
@@ -33,7 +36,7 @@ class _CountriesScreenState extends State<CountriesScreen> {
     // Start fetching data when the screen is initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // FIX: Calling the now correctly named fetchCountries
-      Provider.of<CountryProvider>(context, listen: false).fetchCountries(); 
+      Provider.of<CountryProvider>(context, listen: false).fetchCountries();
     });
   }
 
@@ -70,7 +73,8 @@ class _CountriesScreenState extends State<CountriesScreen> {
                   ),
                   onChanged: (value) {
                     setState(() {
-                      _searchQuery = value; // Update state to trigger filtering and UI rebuild
+                      _searchQuery =
+                          value; // Update state to trigger filtering and UI rebuild
                     });
                   },
                 ),
@@ -79,7 +83,8 @@ class _CountriesScreenState extends State<CountriesScreen> {
               Expanded(
                 child: RefreshIndicator(
                   // MS-05: Pull down to refresh
-                  onRefresh: () => provider.fetchCountries(), // FIX: Calling the now correctly named fetchCountries
+                  onRefresh: () => provider
+                      .fetchCountries(), // FIX: Calling the now correctly named fetchCountries
                   child: () {
                     if (provider.isLoading) {
                       // DH-04: Show loading spinners
@@ -90,29 +95,41 @@ class _CountriesScreenState extends State<CountriesScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.error_outline, color: Colors.red, size: 60),
+                            const Icon(
+                              Icons.error_outline,
+                              color: Colors.red,
+                              size: 60,
+                            ),
                             const SizedBox(height: 10),
-                            Text(provider.errorMessage!, textAlign: TextAlign.center),
+                            Text(
+                              provider.errorMessage!,
+                              textAlign: TextAlign.center,
+                            ),
                             const SizedBox(height: 10),
                             ElevatedButton(
-                              onPressed: () => provider.fetchCountries(), // FIX: Calling the now correctly named fetchCountries
+                              onPressed: () => provider
+                                  .fetchCountries(), // FIX: Calling the now correctly named fetchCountries
                               child: const Text('Retry'),
                             ),
                           ],
                         ),
                       );
                     } else if (filteredCountries.isEmpty) {
-                      return const Center(child: Text('No countries found matching your search.'));
+                      return const Center(
+                        child: Text('No countries found matching your search.'),
+                      );
                     } else {
                       // MS-02: Grid view showing all countries
                       return GridView.builder(
                         padding: const EdgeInsets.all(8.0),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 0.7, // Adjust ratio for better card fitting
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                        ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio:
+                                  0.7, // Adjust ratio for better card fitting
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 10,
+                            ),
                         itemCount: filteredCountries.length,
                         itemBuilder: (context, index) {
                           final country = filteredCountries[index];
@@ -142,7 +159,10 @@ class CountryCard extends StatelessWidget {
     // NV-01: Tap a country -> see its details
     return GestureDetector(
       onTap: () {
-        debugPrint('Tapped on ${country.commonName}');
+        // Navigate to the detail screen when a country is tapped
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => DetailScreen(country: country)),
+        );
       },
       child: Card(
         elevation: 4,
@@ -154,11 +174,19 @@ class CountryCard extends StatelessWidget {
             Expanded(
               flex: 3,
               child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
-                child: Image.network(
-                  country.flagUrl.isNotEmpty ? country.flagUrl : 'https://placehold.co/600x400/000000/FFFFFF/png?text=No+Flag',
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.broken_image, size: 40)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(15),
+                ),
+                child: Hero(
+                  tag: country.commonName,
+                  child: Image.network(
+                    country.flagUrl.isNotEmpty
+                        ? country.flagUrl
+                        : 'https://placehold.co/600x400/000000/FFFFFF/png?text=No+Flag',
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Center(child: Icon(Icons.broken_image, size: 40)),
+                  ),
                 ),
               ),
             ),
@@ -173,7 +201,10 @@ class CountryCard extends StatelessWidget {
                     // Name
                     Text(
                       country.commonName,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -189,7 +220,7 @@ class CountryCard extends StatelessWidget {
                     // Population (formatted for readability)
                     Text(
                       // NumberFormat requires the 'intl' package dependency
-                      'Pop: ${NumberFormat.compact().format(country.population)}', 
+                      'Pop: ${NumberFormat.compact().format(country.population)}',
                       style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     ),
                   ],
