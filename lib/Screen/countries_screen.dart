@@ -5,6 +5,8 @@ import '../model/country_model.dart';
 import '../provider/country_provider.dart';
 import 'detail_screen.dart';
 
+enum SortOption { nameAsc, nameDesc, populationAsc, populationDesc }
+
 class CountriesScreen extends StatefulWidget {
   const CountriesScreen({super.key});
 
@@ -15,6 +17,25 @@ class CountriesScreen extends StatefulWidget {
 class _CountriesScreenState extends State<CountriesScreen> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+  // Sorting state
+  SortOption _sortOption = SortOption.nameAsc;
+
+  void _applySort(List<Country> list) {
+    switch (_sortOption) {
+      case SortOption.nameAsc:
+        list.sort((a, b) => a.commonName.compareTo(b.commonName));
+        break;
+      case SortOption.nameDesc:
+        list.sort((a, b) => b.commonName.compareTo(a.commonName));
+        break;
+      case SortOption.populationAsc:
+        list.sort((a, b) => a.population.compareTo(b.population));
+        break;
+      case SortOption.populationDesc:
+        list.sort((a, b) => b.population.compareTo(a.population));
+        break;
+    }
+  }
 
   // Function to filter countries based on the search query
   List<Country> _filterCountries(List<Country> countries) {
@@ -47,6 +68,11 @@ class _CountriesScreenState extends State<CountriesScreen> {
       builder: (context, provider, child) {
         // Filter the country list based on the search query
         final filteredCountries = _filterCountries(provider.countries);
+        // Apply sorting to a copy so we don't mutate provider's list
+        final List<Country> sortedCountries = List<Country>.from(
+          filteredCountries,
+        );
+        _applySort(sortedCountries);
 
         return Scaffold(
           appBar: AppBar(
@@ -63,6 +89,32 @@ class _CountriesScreenState extends State<CountriesScreen> {
                   decoration: InputDecoration(
                     hintText: 'Search by country or capital...',
                     prefixIcon: const Icon(Icons.search),
+                    // Filter button on the right side of the search field
+                    suffixIcon: PopupMenuButton<SortOption>(
+                      icon: const Icon(Icons.filter_list),
+                      tooltip: 'Filter / Sort',
+                      onSelected: (opt) {
+                        setState(() => _sortOption = opt);
+                      },
+                      itemBuilder: (context) => const [
+                        PopupMenuItem(
+                          value: SortOption.nameAsc,
+                          child: Text('Name ↑'),
+                        ),
+                        PopupMenuItem(
+                          value: SortOption.nameDesc,
+                          child: Text('Name ↓'),
+                        ),
+                        PopupMenuItem(
+                          value: SortOption.populationAsc,
+                          child: Text('Population ↑'),
+                        ),
+                        PopupMenuItem(
+                          value: SortOption.populationDesc,
+                          child: Text('Population ↓'),
+                        ),
+                      ],
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
                       borderSide: BorderSide.none,
@@ -130,9 +182,9 @@ class _CountriesScreenState extends State<CountriesScreen> {
                               crossAxisSpacing: 10,
                               mainAxisSpacing: 10,
                             ),
-                        itemCount: filteredCountries.length,
+                        itemCount: sortedCountries.length,
                         itemBuilder: (context, index) {
-                          final country = filteredCountries[index];
+                          final country = sortedCountries[index];
                           // The CountryCard assumes Country has properties like flagUrl, commonName, capital, population
                           return CountryCard(country: country);
                         },
